@@ -248,6 +248,12 @@
         .hidden {
             display: none;
         }
+        .unit-label {
+            margin-left: 6px;
+            color: #6b7280;
+            font-size: 13px;
+            white-space: nowrap;
+        }
 
         @media (max-width: 600px) {
             .form-grid {
@@ -433,6 +439,12 @@
                         <textarea id="warmUpQuestions" placeholder="Введіть кілька запитань, кожне з нового рядка. Якщо залишите порожнім - запитання буде згенеровано автоматично"></textarea>
                         <span class="hint">Якщо не вкажете - будуть згенеровані автоматично за темою уроку</span>
                     </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Кількість запитань для розминки</label>
+                            <input type="number" id="warmUpQuestionsCount" value="4" min="1" max="15">
+                        </div>
+                    </div>
                 </div>
             `;
         }
@@ -514,6 +526,8 @@
                 div.innerHTML = `
                     <input type="checkbox" class="exercise-type" value="${type}" id="${checkboxId}">
                     <label for="${checkboxId}">${type}</label>
+                    <input type="number" class="exercise-sentences" value="7" min="1" max="20" style="margin-left:8px; width:64px" title="Кількість речень для цього типу">
+                    <span class="unit-label">речень</span>
                 `;
                 exercisesDiv.appendChild(div);
             });
@@ -591,6 +605,8 @@
                     div.innerHTML = `
                         <input type="checkbox" class="post-text-task" value="${type}" id="${checkboxId}">
                         <label for="${checkboxId}">${type}</label>
+                        <input type="number" class="post-text-count" value="7" min="1" max="20" style="margin-left:8px; width:64px" title="Кількість речень/питань">
+                        <span class="unit-label">речень</span>
                     `;
                     list.appendChild(div);
                 });
@@ -652,6 +668,8 @@
                 div.innerHTML = `
                     <input type="checkbox" class="grammar-type" value="${type}" id="${checkboxId}">
                     <label for="${checkboxId}">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                    <input type="number" class="grammar-sentences" value="7" min="1" max="20" style="margin-left:8px; width:64px" title="Кількість речень для цього типу">
+                    <span class="unit-label">речень</span>
                 `;
                 typesDiv.appendChild(div);
             });
@@ -685,10 +703,11 @@
             // Розминка
             if (warmUpCount > 0) {
                 const warmUpQuestions = document.getElementById('warmUpQuestions')?.value.trim();
+                const warmUpQuestionsCount = parseInt(document.getElementById('warmUpQuestionsCount')?.value || '4', 10);
                 if (warmUpQuestions) {
                     prompt += `\n\nРозпочни урок із розминки (Warm-Up) з наступними запитаннями:\n${warmUpQuestions}`;
                 } else {
-                    prompt += `\n\nРозпочни урок із розминки (Warm-Up). Придумай 3-5 запитань за темою "${lessonTopic}" для розігріву учнів.`;
+                    prompt += `\n\nРозпочни урок із розминки (Warm-Up). Придумай ${warmUpQuestionsCount} запитань за темою "${lessonTopic}" для розігріву учнів.`;
                 }
             }
 
@@ -708,7 +727,13 @@
                 const useCustom = useCustomCheckbox.checked;
                 const customWords = customWordsTextarea?.value.trim() || '';
                 const cyrillic = cyrillicCheckbox.checked;
-                const exerciseTypes = Array.from(block.querySelectorAll('.exercise-type:checked')).map(cb => cb.value);
+                const exerciseTypesDetailed = Array
+                    .from(block.querySelectorAll('.exercise-type:checked'))
+                    .map(cb => {
+                        const sentencesInput = cb.parentElement.querySelector('.exercise-sentences');
+                        const sentences = parseInt(sentencesInput?.value || '6', 10);
+                        return { type: cb.value, sentences };
+                    });
 
                 prompt += `\n\nСловник${vocabBlocks.length > 1 ? ` #${index + 1}` : ''}:\nМова перекладу словника — ${language}.`;
                 
@@ -725,8 +750,9 @@
                     prompt += `\nВАЖЛИВО: Використовуй лише українську мову без російських букв "ё" та "ъ".`;
                 }
 
-                if (exerciseTypes.length > 0) {
-                    prompt += `\n\nВправи за лексикою:\nДодай ${exercisesCount} вправ типів: ${exerciseTypes.join(', ')}.`;
+                if (exerciseTypesDetailed.length > 0) {
+                    const typesWithCounts = exerciseTypesDetailed.map(t => `${t.type} — ${t.sentences} речень`).join(', ');
+                    prompt += `\n\nВправи за лексикою:\nДодай ${exercisesCount} вправ з такими параметрами: ${typesWithCounts}.`;
                 }
             });
 
@@ -740,9 +766,16 @@
                 const addPostTextTasksCheckbox = document.getElementById('addPostTextTasks');
                 const addPostTextTasks = addPostTextTasksCheckbox ? addPostTextTasksCheckbox.checked : false;
                 if (addPostTextTasks) {
-                    const postTextTasks = Array.from(document.querySelectorAll('.post-text-task:checked')).map(cb => cb.value);
-                    if (postTextTasks.length > 0) {
-                        prompt += `\nДодай післятекстові завдання типів: ${postTextTasks.join(', ')}.`;
+                    const postTextTasksDetailed = Array
+                        .from(document.querySelectorAll('.post-text-task:checked'))
+                        .map(cb => {
+                            const countInput = cb.parentElement.querySelector('.post-text-count');
+                            const countVal = parseInt(countInput?.value || '6', 10);
+                            return { type: cb.value, count: countVal };
+                        });
+                    if (postTextTasksDetailed.length > 0) {
+                        const listWithCounts = postTextTasksDetailed.map(t => `${t.type} — ${t.count} речень/питань`).join(', ');
+                        prompt += `\nДодай післятекстові завдання з такими параметрами: ${listWithCounts}.`;
                     }
                 }
             }
@@ -759,16 +792,27 @@
                 if (!topic) return;
                 
                 const exercisesCount = exercisesCountInput.value;
-                const grammarTypes = Array.from(block.querySelectorAll('.grammar-type:checked')).map(cb => cb.value);
+                const grammarTypesDetailed = Array
+                    .from(block.querySelectorAll('.grammar-type:checked'))
+                    .map(cb => {
+                        const sentencesInput = cb.parentElement.querySelector('.grammar-sentences');
+                        const sentences = parseInt(sentencesInput?.value || '6', 10);
+                        return { type: cb.value, sentences };
+                    });
 
-                prompt += `\n\nГраматика${grammarBlocks.length > 1 ? ` #${index + 1}` : ''}:\nДодай граматичну тему "${topic}" з ${exercisesCount} вправами типів: ${grammarTypes.join(', ')}.`;
+                if (grammarTypesDetailed.length > 0) {
+                    const typesWithCounts = grammarTypesDetailed.map(t => `${t.type} — ${t.sentences} речень`).join(', ');
+                    prompt += `\n\nГраматика${grammarBlocks.length > 1 ? ` #${index + 1}` : ''}:\nДодай граматичну тему "${topic}" з ${exercisesCount} вправами з такими параметрами: ${typesWithCounts}.`;
+                } else {
+                    prompt += `\n\nГраматика${grammarBlocks.length > 1 ? ` #${index + 1}` : ''}:\nДодай граматичну тему "${topic}" з ${exercisesCount} вправами.`;
+                }
             });
 
             // Відповіді до завдань
             if (includeAnswers) {
-                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями та відповідями до завдань у кінці. У кожному завданні має бути мінімум 7 речень.`;
+                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями та відповідями до завдань у кінці.`;
             } else {
-                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями. Відповіді до завдань не генеруй. У кожному завданні має бути мінімум 7 речень.`;
+                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями. Відповіді до завдань не генеруй.`;
             }
 
             if (makeInteractive) {
