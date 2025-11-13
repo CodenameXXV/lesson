@@ -198,36 +198,6 @@
             color: #667eea;
         }
 
-        .tag-input {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 8px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            min-height: 44px;
-        }
-
-        .tag {
-            background: #667eea;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .tag button {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 0;
-            font-size: 14px;
-        }
-
         .generate-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -415,20 +385,24 @@
                 includeAnswers: document.getElementById('includeAnswers').checked,
                 makeInteractive: document.getElementById('makeInteractive').checked
             };
-            localStorage.setItem('lessonGeneratorSettings', JSON.stringify(settings));
+            try {
+                localStorage.setItem('lessonGeneratorSettings', JSON.stringify(settings));
+            } catch(e) {}
         }
 
         // Завантаження налаштувань
         function loadSettings() {
-            const saved = localStorage.getItem('lessonGeneratorSettings');
-            if (saved) {
-                const settings = JSON.parse(saved);
-                document.getElementById('chatbotSelect').value = settings.chatbot || 'https://chatgpt.com/';
-                document.getElementById('levelSelect').value = settings.level || 'B1';
-                document.getElementById('languageSelect').value = settings.language || 'українська';
-                document.getElementById('includeAnswers').checked = settings.includeAnswers !== false;
-                document.getElementById('makeInteractive').checked = settings.makeInteractive || false;
-            }
+            try {
+                const saved = localStorage.getItem('lessonGeneratorSettings');
+                if (saved) {
+                    const settings = JSON.parse(saved);
+                    document.getElementById('chatbotSelect').value = settings.chatbot || 'https://chatgpt.com/';
+                    document.getElementById('levelSelect').value = settings.level || 'B1';
+                    document.getElementById('languageSelect').value = settings.language || 'українська';
+                    document.getElementById('includeAnswers').checked = settings.includeAnswers !== false;
+                    document.getElementById('makeInteractive').checked = settings.makeInteractive || false;
+                }
+            } catch(e) {}
         }
 
         // Слухачі для збереження налаштувань
@@ -469,6 +443,7 @@
             const btn = document.getElementById('addWarmUpBtn');
             btn.classList.remove('hidden');
         }
+
         // Лексика
         function addVocabulary() {
             vocabularyCount++;
@@ -579,7 +554,7 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group full">
-                            <label>Тема тексту (необов'ązково)</label>
+                            <label>Тема тексту (необов'язково)</label>
                             <input type="text" id="textTopic" placeholder="Якщо не вказано - використовується тема уроку">
                         </div>
                     </div>
@@ -789,7 +764,12 @@
                 prompt += `\n\nГраматика${grammarBlocks.length > 1 ? ` #${index + 1}` : ''}:\nДодай граматичну тему "${topic}" з ${exercisesCount} вправами типів: ${grammarTypes.join(', ')}.`;
             });
 
-            prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями${includeAnswers ? ' та відповідями до завдань у кінці' : ''}.`;
+            // Відповіді до завдань
+            if (includeAnswers) {
+                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями та відповідями до завдань у кінці. У кожному завданні має бути мінімум 7 речень.`;
+            } else {
+                prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями. Відповіді до завдань не генеруй. У кожному завданні має бути мінімум 7 речень.`;
+            }
 
             if (makeInteractive) {
                 prompt += `\n\nСТВОРИ ІНТЕРАКТИВНИЙ УРОК В HTML:\n- Створи повноцінний HTML-файл з усім уроком\n- Додай інтерактивні елементи: кнопки для перевірки відповідей, інпути для введення відповідей, вибір варіантів\n- Використовуй JavaScript для перевірки правильності відповідей\n- Додай стилі CSS для гарного вигляду\n- Зроби так, щоб учень міг виконувати завдання прямо в браузері\n- Показуй результати (правильно/неправильно) після перевірки\n- Додай підрахунок балів або відсоток правильних відповідей\n- Весь код має бути в одному HTML-файлі`;
