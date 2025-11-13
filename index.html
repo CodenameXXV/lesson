@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор уроків англійської мови</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            margin: 0;
+            user-select: none;
+        }
+
+        .module-block {
+            background: #f9fafb;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .module-block.active {
+            background: #eff6ff;
+            border-color: #667eea;
+            border-style: solid;
+        }
+
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .module-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        .add-module-btn {
+            background: #f3f4f6;
+            border: 2px dashed #9ca3af;
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .add-module-btn:hover {
+            background: #e5e7eb;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .tag-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            min-height: 44px;
+        }
+
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .prompt-output {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-graduation-cap"></i> Генератор уроків англійської</h1>
+            <p>Швидке створення структурованих уроків для ChatGPT</p>
+        </div>
+
+        <!-- Базові налаштування -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-cog"></i>
+                Базові налаштування
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Чат-бот</label>
+                    <select id="chatbotSelect">
+                        <option value="https://chatgpt.com/">ChatGPT</option>
+                        <option value="https://gemini.google.com/">Google Gemini</option>
+                        <option value="https://chat.qwen.ai/">Qwen AI</option>
+                        <option value="https://copilot.microsoft.com/">Microsoft Copilot</option>
+                        <option value="https://chat.deepseek.com/">DeepSeek</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Рівень англійської</label>
+                    <select id="levelSelect">
+                        <option value="A1">A1 - Beginner</option>
+                        <option value="A2">A2 - Elementary</option>
+                        <option value="B1" selected>B1 - Intermediate</option>
+                        <option value="B2">B2 - Upper-Intermediate</option>
+                        <option value="C1">C1 - Advanced</option>
+                        <option value="C2">C2 - Proficiency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Мова перекладу</label>
+                    <select id="languageSelect">
+                        <option value="українська">Українська</option>
+                        <option value="російська">Російська</option>
+                    </select>
+                </div>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="includeAnswers" checked>
+                <label for="includeAnswers">Додати відповіді до завдань</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="makeInteractive">
+                <label for="makeInteractive">Зробити інтерактивний урок в HTML (для продвинутих користувачів)</label>
+            </div>
+        </div>
+
+        <!-- Тема уроку -->
+        <div class="card">
+            <div class="card-title">
+                <i class="fas fa-book"></i>
+                Тема уроку
+            </div>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>Тема уроку *</label>
+                    <input type="text" id="lessonTopic" placeholder="Food, Emotions, Sports...">
+                </div>
+                <div class="form-group full">
+                    <label>Опис теми (необов'язково)</label>
+                    <textarea id="topicDescription" placeholder="Детальніший опис теми уроку..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Розминка -->
+        <div id="warmUpContainer"></div>
+        <button class="add-module-btn" id="addWarmUpBtn" onclick="addWarmUp()">
+            <i class="fas fa-plus-circle"></i>
+            Додати розминку (Warm-Up)
+        </button>
+
+        <!-- Лексика -->
+        <div id="vocabularyContainer"></div>
+        <button class="add-module-btn" onclick="addVocabulary()">
+            <i class="fas fa-plus-circle"></i>
+            Додати лексику
+        </button>
+
+        <!-- Текст -->
+        <div id="textContainer"></div>
+        <button class="add-module-btn" id="addTextBtn" onclick="addText()">
+            <i class="fas fa-plus-circle"></i>
+            Додати текст за темою
+        </button>
+
+        <!-- Граматика -->
+        <div id="grammarContainer"></div>
+        <button class="add-module-btn" onclick="addGrammar()">
+            <i class="fas fa-plus-circle"></i>
+            Додати граматику
+        </button>
+
+        <!-- Генерація -->
+        <div class="card">
+            <button class="generate-btn" onclick="generateAndOpen()">
+                <i class="fas fa-magic"></i>
+                Згенерувати урок
+            </button>
+            <div id="promptOutput" class="prompt-output hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        let warmUpCount = 0;
+        let vocabularyCount = 0;
+        let grammarCount = 0;
+        let textCount = 0;
+
+        // Завантаження збережених налаштувань
+        window.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+        });
+
+        // Збереження налаштувань
+        function saveSettings() {
+            const settings = {
+                chatbot: document.getElementById('chatbotSelect').value,
+                level: document.getElementById('levelSelect').value,
+                language: document.getElementById('languageSelect').value,
+                includeAnswers: document.getElementById('includeAnswers').checked,
+                makeInteractive: document.getElementById('makeInteractive').checked
+            };
+            localStorage.setItem('lessonGeneratorSettings', JSON.stringify(settings));
+        }
+
+        // Завантаження налаштувань
+        function loadSettings() {
+            const saved = localStorage.getItem('lessonGeneratorSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                document.getElementById('chatbotSelect').value = settings.chatbot || 'https://chatgpt.com/';
+                document.getElementById('levelSelect').value = settings.level || 'B1';
+                document.getElementById('languageSelect').value = settings.language || 'українська';
+                document.getElementById('includeAnswers').checked = settings.includeAnswers !== false;
+                document.getElementById('makeInteractive').checked = settings.makeInteractive || false;
+            }
+        }
+
+        // Слухачі для збереження налаштувань
+        document.getElementById('chatbotSelect').addEventListener('change', saveSettings);
+        document.getElementById('levelSelect').addEventListener('change', saveSettings);
+        document.getElementById('languageSelect').addEventListener('change', saveSettings);
+        document.getElementById('includeAnswers').addEventListener('change', saveSettings);
+        document.getElementById('makeInteractive').addEventListener('change', saveSettings);
+
+        // Розминка
+        function addWarmUp() {
+            if (warmUpCount > 0) return;
+            warmUpCount++;
+            const container = document.getElementById('warmUpContainer');
+            const btn = document.getElementById('addWarmUpBtn');
+            btn.classList.add('hidden');
+            
+            container.innerHTML = `
+                <div class="card module-block active">
+                    <div class="module-header">
+                        <h3><i class="fas fa-fire"></i> Розминка (Warm-Up)</h3>
+                        <button class="btn-remove" onclick="removeWarmUp()">
+                            <i class="fas fa-trash"></i> Видалити
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <label>Запитання для розминки (необов'язково)</label>
+                        <textarea id="warmUpQuestions" placeholder="Введіть кілька запитань, кожне з нового рядка. Якщо залишите порожнім - запитання буде згенеровано автоматично"></textarea>
+                        <span class="hint">Якщо не вкажете - будуть згенеровані автоматично за темою уроку</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function removeWarmUp() {
+            warmUpCount = 0;
+            document.getElementById('warmUpContainer').innerHTML = '';
+            const btn = document.getElementById('addWarmUpBtn');
+            btn.classList.remove('hidden');
+        }
+        // Лексика
+        function addVocabulary() {
+            vocabularyCount++;
+            const container = document.getElementById('vocabularyContainer');
+            const id = `vocab-${vocabularyCount}`;
+            
+            const block = document.createElement('div');
+            block.className = 'card module-block active';
+            block.id = id;
+            block.innerHTML = `
+                <div class="module-header">
+                    <h3><i class="fas fa-language"></i> Словник #${vocabularyCount}</h3>
+                    <button class="btn-remove" onclick="removeModule('${id}')">
+                        <i class="fas fa-trash"></i> Видалити
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Кількість слів</label>
+                        <input type="number" class="vocab-count" value="10" min="1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Кількість вправ</label>
+                        <input type="number" class="vocab-exercises" value="3" min="0" max="5" onchange="toggleExerciseTypes('${id}')">
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" class="use-custom-words" id="${id}-custom-cb" onchange="toggleCustomWords('${id}')">
+                    <label for="${id}-custom-cb">Використати власний список слів</label>
+                </div>
+                <div class="custom-words-field hidden" id="${id}-custom">
+                    <div class="form-group" style="margin-top: 12px;">
+                        <label>Ваш список слів</label>
+                        <textarea class="custom-words" placeholder="apple, banana, orange..."></textarea>
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" class="cyrillic-transcription" id="${id}-cyrillic" checked>
+                    <label for="${id}-cyrillic">Транскрипція кирилицею</label>
+                </div>
+                <div class="form-group" id="${id}-exercises-container" style="margin-top: 12px;">
+                    <label>Типи вправ</label>
+                    <div id="${id}-exercises"></div>
+                </div>
+            `;
+            container.appendChild(block);
+            
+            // Додати чекбокси для типів вправ
+            const exercisesDiv = document.getElementById(`${id}-exercises`);
+            const types = [
+                'Match the words',
+                'Complete the sentences',
+                'Choose the correct answer',
+                'Fill in the gaps',
+                'True / False',
+                'Word formation',
+                'Find the odd word',
+                'Synonyms and antonyms',
+                'Collocations',
+                'Phrasal verbs',
+                'Use in context',
+                'Translate sentences'
+            ];
+            types.forEach((type, i) => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                const checkboxId = `${id}-ex-${i}`;
+                div.innerHTML = `
+                    <input type="checkbox" class="exercise-type" value="${type}" id="${checkboxId}">
+                    <label for="${checkboxId}">${type}</label>
+                `;
+                exercisesDiv.appendChild(div);
+            });
+        }
+
+        function toggleCustomWords(id) {
+            const checkbox = document.querySelector(`#${id} .use-custom-words`);
+            const customField = document.getElementById(`${id}-custom`);
+            customField.classList.toggle('hidden', !checkbox.checked);
+        }
+
+        function toggleExerciseTypes(id) {
+            const exercisesCount = document.querySelector(`#${id} .vocab-exercises`).value;
+            const exercisesContainer = document.getElementById(`${id}-exercises-container`);
+            
+            if (parseInt(exercisesCount) === 0) {
+                exercisesContainer.classList.add('hidden');
+            } else {
+                exercisesContainer.classList.remove('hidden');
+            }
+        }
+
+        // Текст
+        function addText() {
+            if (textCount > 0) return;
+            textCount++;
+            const container = document.getElementById('textContainer');
+            const btn = document.getElementById('addTextBtn');
+            btn.classList.add('hidden');
+            
+            container.innerHTML = `
+                <div class="card module-block active">
+                    <div class="module-header">
+                        <h3><i class="fas fa-align-left"></i> Текст за темою</h3>
+                        <button class="btn-remove" onclick="removeText()">
+                            <i class="fas fa-trash"></i> Видалити
+                        </button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label>Тема тексту (необов'ązково)</label>
+                            <input type="text" id="textTopic" placeholder="Якщо не вказано - використовується тема уроку">
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="addPostTextTasks" onchange="togglePostTextTasks()">
+                        <label for="addPostTextTasks">Додати післятекстові завдання</label>
+                    </div>
+                    <div id="postTextTasksField" class="hidden" style="margin-top: 12px;">
+                        <div id="postTextTasksList"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function removeText() {
+            textCount = 0;
+            document.getElementById('textContainer').innerHTML = '';
+            const btn = document.getElementById('addTextBtn');
+            btn.classList.remove('hidden');
+        }
+
+        function togglePostTextTasks() {
+            const checkbox = document.getElementById('addPostTextTasks');
+            const field = document.getElementById('postTextTasksField');
+            field.classList.toggle('hidden', !checkbox.checked);
+            
+            if (checkbox.checked && document.getElementById('postTextTasksList').children.length === 0) {
+                const list = document.getElementById('postTextTasksList');
+                const types = ['True / False', 'Questions', 'Multiple choice test'];
+                types.forEach((type, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'checkbox-group';
+                    const checkboxId = `post-text-${i}`;
+                    div.innerHTML = `
+                        <input type="checkbox" class="post-text-task" value="${type}" id="${checkboxId}">
+                        <label for="${checkboxId}">${type}</label>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        }
+
+        // Граматика
+        function addGrammar() {
+            grammarCount++;
+            const container = document.getElementById('grammarContainer');
+            const id = `grammar-${grammarCount}`;
+            
+            const block = document.createElement('div');
+            block.className = 'card module-block active';
+            block.id = id;
+            block.innerHTML = `
+                <div class="module-header">
+                    <h3><i class="fas fa-spell-check"></i> Граматика #${grammarCount}</h3>
+                    <button class="btn-remove" onclick="removeModule('${id}')">
+                        <i class="fas fa-trash"></i> Видалити
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Граматична тема *</label>
+                        <input type="text" class="grammar-topic" placeholder="Present Simple, Going to...">
+                    </div>
+                    <div class="form-group">
+                        <label>Кількість вправ</label>
+                        <input type="number" class="grammar-exercises" value="2" min="1" max="5">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Типи граматичних вправ</label>
+                    <div id="${id}-types"></div>
+                </div>
+            `;
+            container.appendChild(block);
+            
+            // Додати чекбокси для типів вправ
+            const typesDiv = document.getElementById(`${id}-types`);
+            const types = [
+                'choose',
+                'complete',
+                'fill in',
+                'transform',
+                'correct the mistakes',
+                'rewrite',
+                'combine sentences',
+                'make questions',
+                'make negatives',
+                'open the brackets',
+                'put in order'
+            ];
+            types.forEach((type, i) => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-group';
+                const checkboxId = `${id}-gr-${i}`;
+                div.innerHTML = `
+                    <input type="checkbox" class="grammar-type" value="${type}" id="${checkboxId}">
+                    <label for="${checkboxId}">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                `;
+                typesDiv.appendChild(div);
+            });
+        }
+
+        function removeModule(id) {
+            document.getElementById(id).remove();
+        }
+
+        // Генерація
+        function generateAndOpen() {
+            const chatbotUrl = document.getElementById('chatbotSelect').value;
+            const level = document.getElementById('levelSelect').value;
+            const language = document.getElementById('languageSelect').value;
+            const includeAnswers = document.getElementById('includeAnswers').checked;
+            const makeInteractive = document.getElementById('makeInteractive').checked;
+            const lessonTopic = document.getElementById('lessonTopic').value.trim();
+            const topicDescription = document.getElementById('topicDescription').value.trim();
+
+            if (!lessonTopic) {
+                alert('Будь ласка, введіть тему уроку!');
+                return;
+            }
+
+            let prompt = `Створи урок англійської мови за темою "${lessonTopic}" для рівня ${level}.`;
+            
+            if (topicDescription) {
+                prompt += `\n\nОпис теми: ${topicDescription}`;
+            }
+
+            // Розминка
+            if (warmUpCount > 0) {
+                const warmUpQuestions = document.getElementById('warmUpQuestions')?.value.trim();
+                if (warmUpQuestions) {
+                    prompt += `\n\nРозпочни урок із розминки (Warm-Up) з наступними запитаннями:\n${warmUpQuestions}`;
+                } else {
+                    prompt += `\n\nРозпочни урок із розминки (Warm-Up). Придумай 3-5 запитань за темою "${lessonTopic}" для розігріву учнів.`;
+                }
+            }
+
+            // Лексика
+            const vocabBlocks = document.querySelectorAll('[id^="vocab-"]');
+            vocabBlocks.forEach((block, index) => {
+                const countInput = block.querySelector('.vocab-count');
+                const exercisesCountInput = block.querySelector('.vocab-exercises');
+                const useCustomCheckbox = block.querySelector('.use-custom-words');
+                const customWordsTextarea = block.querySelector('.custom-words');
+                const cyrillicCheckbox = block.querySelector('.cyrillic-transcription');
+                
+                if (!countInput || !exercisesCountInput || !useCustomCheckbox || !cyrillicCheckbox) return;
+                
+                const count = countInput.value;
+                const exercisesCount = exercisesCountInput.value;
+                const useCustom = useCustomCheckbox.checked;
+                const customWords = customWordsTextarea?.value.trim() || '';
+                const cyrillic = cyrillicCheckbox.checked;
+                const exerciseTypes = Array.from(block.querySelectorAll('.exercise-type:checked')).map(cb => cb.value);
+
+                prompt += `\n\nСловник${vocabBlocks.length > 1 ? ` #${index + 1}` : ''}:\nМова перекладу словника — ${language}.`;
+                
+                if (useCustom && customWords) {
+                    const wordsList = customWords.split(/[,\n]/).map(w => w.trim()).filter(w => w).join(', ');
+                    prompt += `\nВикористай наступний список слів для словника: ${wordsList}.`;
+                } else {
+                    prompt += `\nКількість слів — ${count}.`;
+                }
+                
+                prompt += `\nСформуй словник у таблиці з трьома колонками: слово — транскрипція ${cyrillic ? 'кирилицею' : '(міжнародна фонетична)'} — переклад ${language === 'українська' ? 'українською' : 'російською'} мовою.`;
+                
+                if (language === 'українська') {
+                    prompt += `\nВАЖЛИВО: Використовуй лише українську мову без російських букв "ё" та "ъ".`;
+                }
+
+                if (exerciseTypes.length > 0) {
+                    prompt += `\n\nВправи за лексикою:\nДодай ${exercisesCount} вправ типів: ${exerciseTypes.join(', ')}.`;
+                }
+            });
+
+            // Текст
+            if (textCount > 0) {
+                const textTopicInput = document.getElementById('textTopic');
+                const textTopic = textTopicInput ? textTopicInput.value.trim() : '';
+                const finalTextTopic = textTopic || lessonTopic;
+                prompt += `\n\nТекст:\nСтвори короткий текст за темою: "${finalTextTopic}".`;
+                
+                const addPostTextTasksCheckbox = document.getElementById('addPostTextTasks');
+                const addPostTextTasks = addPostTextTasksCheckbox ? addPostTextTasksCheckbox.checked : false;
+                if (addPostTextTasks) {
+                    const postTextTasks = Array.from(document.querySelectorAll('.post-text-task:checked')).map(cb => cb.value);
+                    if (postTextTasks.length > 0) {
+                        prompt += `\nДодай післятекстові завдання типів: ${postTextTasks.join(', ')}.`;
+                    }
+                }
+            }
+
+            // Граматика
+            const grammarBlocks = document.querySelectorAll('[id^="grammar-"]');
+            grammarBlocks.forEach((block, index) => {
+                const topicInput = block.querySelector('.grammar-topic');
+                const exercisesCountInput = block.querySelector('.grammar-exercises');
+                
+                if (!topicInput || !exercisesCountInput) return;
+                
+                const topic = topicInput.value.trim();
+                if (!topic) return;
+                
+                const exercisesCount = exercisesCountInput.value;
+                const grammarTypes = Array.from(block.querySelectorAll('.grammar-type:checked')).map(cb => cb.value);
+
+                prompt += `\n\nГраматика${grammarBlocks.length > 1 ? ` #${index + 1}` : ''}:\nДодай граматичну тему "${topic}" з ${exercisesCount} вправами типів: ${grammarTypes.join(', ')}.`;
+            });
+
+            prompt += `\n\nВесь урок має бути структурованим, з чіткими інструкціями${includeAnswers ? ' та відповідями до завдань у кінці' : ''}.`;
+
+            if (makeInteractive) {
+                prompt += `\n\nСТВОРИ ІНТЕРАКТИВНИЙ УРОК В HTML:\n- Створи повноцінний HTML-файл з усім уроком\n- Додай інтерактивні елементи: кнопки для перевірки відповідей, інпути для введення відповідей, вибір варіантів\n- Використовуй JavaScript для перевірки правильності відповідей\n- Додай стилі CSS для гарного вигляду\n- Зроби так, щоб учень міг виконувати завдання прямо в браузері\n- Показуй результати (правильно/неправильно) після перевірки\n- Додай підрахунок балів або відсоток правильних відповідей\n- Весь код має бути в одному HTML-файлі`;
+            }
+
+            // Відображення
+            document.getElementById('promptOutput').textContent = prompt;
+            document.getElementById('promptOutput').classList.remove('hidden');
+
+            // Копіювання та відкриття
+            navigator.clipboard.writeText(prompt).then(() => {
+                document.getElementById('promptOutput').scrollIntoView({ behavior: 'smooth' });
+                
+                setTimeout(() => {
+                    const encodedPrompt = encodeURIComponent(prompt);
+                    let finalUrl;
+                    
+                    if (chatbotUrl.includes('chatgpt.com')) {
+                        finalUrl = `${chatbotUrl}?q=${encodedPrompt}`;
+                    } else if (chatbotUrl.includes('gemini.google.com')) {
+                        finalUrl = `${chatbotUrl}app?q=${encodedPrompt}`;
+                    } else if (chatbotUrl.includes('copilot.microsoft.com')) {
+                        finalUrl = `${chatbotUrl}?q=${encodedPrompt}`;
+                    } else {
+                        finalUrl = chatbotUrl;
+                    }
+                    
+                    window.open(finalUrl, '_blank');
+                }, 500);
+            }).catch(() => {
+                alert('Помилка копіювання до буферу обміну.');
+            });
+        }
+    </script>
+</body>
+</html>
